@@ -56,7 +56,7 @@ public class MutualExclusion {
 			for (String mem : votingGroupMembers) {
 				remainingACK.add(mem);
 			}
-			MulticastMessage message = new MulticastMessage(localName, votingGroupName, "REQUEST", null, Type.DATA);
+			MulticastMessage message = new MulticastMessage(localName, votingGroupName, "REQUEST", "", Type.DATA);
 			multicastService.send(message);
 		}
 	}
@@ -64,7 +64,7 @@ public class MutualExclusion {
 	public void releaseCS() {
 		if (state == STATE.CS_HELD) {
 			state = STATE.CS_RELEASED;
-			MulticastMessage message = new MulticastMessage(localName, votingGroupName, "RELEASED", null, Type.DATA);
+			MulticastMessage message = new MulticastMessage(localName, votingGroupName, "RELEASED", "", Type.DATA);
 			multicastService.send(message);
 		}
 	}
