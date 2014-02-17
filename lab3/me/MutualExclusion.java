@@ -1,5 +1,7 @@
 package me;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -15,7 +17,8 @@ public class MutualExclusion {
 	}
 	private String localName;
 	private boolean voted;
-	private boolean votingGroupName;
+	private String votingGroupName;
+	private ArrayList<String> votingGroupMembers;
 	private LinkedBlockingQueue<MulticastMessage> requestQueue;
 	private HashSet<String> remainingACK;
 	private CORMulticast multicastService;
@@ -30,15 +33,40 @@ public class MutualExclusion {
 		multicastService = new CORMulticast(configurationFileName, localName, ci, cp);
 		state = STATE.CS_RELEASED;
 		// find voting group
+		votingGroupName = "v" + localName;
+		for (HashMap<String, Object> g : ci.getGroups()) {
+			String groupName = (String) g.get("name");
+			if (groupName.equals(votingGroupName)) {
+				votingGroupMembers = (ArrayList<String>) (g.get("members"));
+				break;
+			}
+		}
 		
+		Thread receiverThread = new Thread(new MessageReceiver());
+		receiverThread.start();
+
+		Thread statusCheckerThread = new Thread(new StatusChecker());
+		statusCheckerThread.start();
 	}
 	
 	public void rquestCS() {
-		
+		if (state ==  STATE.CS_RELEASED) {
+			state = STATE.CS_WANTED;
+			remainingACK.clear();
+			for (String mem : votingGroupMembers) {
+				remainingACK.add(mem);
+			}
+			MulticastMessage message = new MulticastMessage(localName, votingGroupName, "REQUEST", null, Type.DATA);
+			multicastService.send(message);
+		}
 	}
 	
 	public void releaseCS() {
-		
+		if (state == STATE.CS_HELD) {
+			state = STATE.CS_RELEASED;
+			MulticastMessage message = new MulticastMessage(localName, votingGroupName, "RELEASED", null, Type.DATA);
+			multicastService.send(message);
+		}
 	}
 	
 	class MessageReceiver implements Runnable {
@@ -64,7 +92,20 @@ public class MutualExclusion {
 						voted = true;
 					}
 				} else if (kind.equals("RELEASE")) {
-					
+					if (requestQueue.isEmpty()) {
+						voted = false;
+					} else {
+						try {
+							MulticastMessage msg = requestQueue.take();
+							MulticastMessage replyMessage = new MulticastMessage(null, localName, 
+									msg.getSource(), "ACK", null, Type.UNICAST, null);
+							multicastService.send(replyMessage);
+							voted = true;
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
 				} else if (kind.equals("ACK")) {
 					if (state == STATE.CS_WANTED && remainingACK.contains(message.getSource())) {
 						remainingACK.remove(message.getSource());
