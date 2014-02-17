@@ -1,5 +1,7 @@
 package app;
 
+import ipc.MessagePasser;
+
 import java.util.Scanner;
 
 import me.MutualExclusion;
@@ -33,6 +35,7 @@ public class MutualExclusionControlPanel {
 	private static final String RELEASE_CMD = "release";
 
 	private CORMulticast multicastService;
+	private MessagePasser messagePasser;
 
 	private Receiver receiver;
 	private Thread receiverThread;
@@ -76,10 +79,11 @@ public class MutualExclusionControlPanel {
 			System.exit(-1);
 		}
 
+		messagePasser = new MessagePasser(configurationFileName, localName, ci, cp);
 		// create CORMulticast and ClockService instances
 		ClockService.initialize(ci.getContactMap().size(), ci.getType(), ci.getLocalNodeId());
-		multicastService = new CORMulticast(configurationFileName, localName, ci, cp);
-
+//		multicastService = new CORMulticast(configurationFileName, localName, ci, cp);
+		
 		receiver = new Receiver();
 		receiverThread = new Thread(receiver);
 		receiverThread.start();
@@ -103,9 +107,9 @@ public class MutualExclusionControlPanel {
 			} else if (cmd.equals(QUIT_CMD)) {
 				scanner.close();
 				System.exit(-1);
-			} else if (cmd.equals("ACQUIRE_CMD")) {
+			} else if (cmd.equals(ACQUIRE_CMD)) {
 				me.rquestCS();
-			} else if (cmd.equals("RELEASE_CMD")) {
+			} else if (cmd.equals(RELEASE_CMD)) {
 				me.releaseCS();
 			}
 			
