@@ -37,8 +37,8 @@ public class MutualExclusionControlPanel {
 	private CORMulticast multicastService;
 	private MessagePasser messagePasser;
 
-	private Receiver receiver;
-	private Thread receiverThread;
+//	private Receiver receiver;
+//	private Thread receiverThread;
 	private MutualExclusion me;
 
 	/**
@@ -49,14 +49,14 @@ public class MutualExclusionControlPanel {
 	 * @author Yinsu Chu
 	 * 
 	 */
-	private class Receiver implements Runnable {
-		public void run() {
-			while (true) {
-				MulticastMessage message = multicastService.receive();
-				System.out.println("message delivered to local node - " + message.toString());
-			}
-		}
-	}
+//	private class Receiver implements Runnable {
+//		public void run() {
+//			while (true) {
+//				MulticastMessage message = multicastService.receive();
+//				System.out.println("message delivered to local node - " + message.toString());
+//			}
+//		}
+//	}
 
 	/**
 	 * This method launches a simple command-line user interface to operate on
@@ -79,14 +79,14 @@ public class MutualExclusionControlPanel {
 			System.exit(-1);
 		}
 
-		messagePasser = new MessagePasser(configurationFileName, localName, ci, cp);
+//		messagePasser = new MessagePasser(configurationFileName, localName, ci, cp);
 		// create CORMulticast and ClockService instances
 		ClockService.initialize(ci.getContactMap().size(), ci.getType(), ci.getLocalNodeId());
 //		multicastService = new CORMulticast(configurationFileName, localName, ci, cp);
 		
-		receiver = new Receiver();
-		receiverThread = new Thread(receiver);
-		receiverThread.start();
+//		receiver = new Receiver();
+//		receiverThread = new Thread(receiver);
+//		receiverThread.start();
 		
 		me = new MutualExclusion(configurationFileName, localName, ci, cp);
 
@@ -113,9 +113,9 @@ public class MutualExclusionControlPanel {
 				me.releaseCS();
 			}
 			
-			if (!receiverThread.isAlive()) {
-				System.out.println("MulticastControlPanel health check: receiver thread died");
-			}
+//			if (!receiverThread.isAlive()) {
+//				System.out.println("MulticastControlPanel health check: receiver thread died");
+//			}
 		}
 	}
 
