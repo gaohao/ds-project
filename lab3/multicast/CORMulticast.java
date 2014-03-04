@@ -126,8 +126,8 @@ public class CORMulticast {
 			while (true) {
 				MulticastMessage message = (MulticastMessage) messagePasser
 						.receive();
-				System.out
-						.println("CORMulticast - message received from MessagePasser - " + message);
+				//System.out
+				//		.println("CORMulticast - message received from MessagePasser - " + message);
 				if (message.getType() == Type.UNICAST) {
 					try {
 						deliverQueue.put(message);

@@ -44,18 +44,19 @@ public class MutualExclusion {
 		
 		Thread receiverThread = new Thread(new MessageReceiver());
 		receiverThread.start();
-
-		Thread statusCheckerThread = new Thread(new StatusChecker());
-		statusCheckerThread.start();
 	}
 	
 	public void rquestCS() {
 		if (state ==  STATE.CS_RELEASED) {
 			state = STATE.CS_WANTED;
+			System.out.println("State changed from RELEASED to WANTED!");
 			remainingACK.clear();
+			String members = "";
 			for (String mem : votingGroupMembers) {
+				members += mem + " ";
 				remainingACK.add(mem);
 			}
+			System.out.println("Request message sent to: " + members);
 			MulticastMessage message = new MulticastMessage(localName, votingGroupName, "REQUEST", "", Type.DATA);
 			multicastService.send(message);
 		}
@@ -63,9 +64,17 @@ public class MutualExclusion {
 	
 	public void releaseCS() {
 		if (state == STATE.CS_HELD) {
+			System.out.println("State changed from HELD to RELEASED!");
 			state = STATE.CS_RELEASED;
-			MulticastMessage message = new MulticastMessage(localName, votingGroupName, "RELEASED", "", Type.DATA);
+			String members = "";
+			for (String mem : votingGroupMembers) {
+				members += mem + " ";
+			}
+			System.out.println("Release message sent to: " + members);
+			MulticastMessage message = new MulticastMessage(localName, votingGroupName, "RELEASE", "", Type.DATA);
 			multicastService.send(message);
+		} else {
+			System.out.println("State: " + state);
 		}
 	}
 	
@@ -76,22 +85,25 @@ public class MutualExclusion {
 			while (true) {
 				MulticastMessage message = multicastService.receive();
 				String kind = message.getKind();	
-				
 				if (kind.equals("REQUEST")) {
+					System.out.println("Receive a REQUEST from " + message.getSource());
 					if (state == STATE.CS_HELD || voted == true) {
 						try {
+							System.out.println("Put message to request queue");
 							requestQueue.put(message);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					} else {
+						System.out.println("Send reply message and voted = true");
 						MulticastMessage replyMessage = new MulticastMessage(null, localName, 
 								message.getSource(), "ACK", null, Type.UNICAST, null);
 						multicastService.send(replyMessage);
 						voted = true;
 					}
 				} else if (kind.equals("RELEASE")) {
+					System.out.println("Receive a RELEASE from " + message.getSource());
 					if (requestQueue.isEmpty()) {
 						voted = false;
 					} else {
@@ -107,8 +119,13 @@ public class MutualExclusion {
 						}
 					}
 				} else if (kind.equals("ACK")) {
+					System.out.println("Receive a ACK from " + message.getSource());
 					if (state == STATE.CS_WANTED && remainingACK.contains(message.getSource())) {
 						remainingACK.remove(message.getSource());
+						if (remainingACK.isEmpty()) {
+							state = STATE.CS_HELD;
+							System.out.println("State changed from WANTED to HELD!!");
+						}
 					}
 				}
 			}
@@ -124,6 +141,7 @@ public class MutualExclusion {
 			while (true) {
 				if (state == STATE.CS_WANTED && remainingACK.isEmpty()) {
 					state = STATE.CS_HELD;
+					System.out.println("State changed from WANTED to HELD!");
 				}
 			}
 		}

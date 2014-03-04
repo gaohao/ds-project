@@ -54,8 +54,8 @@ public class MulticastMessage extends TimeStampedMessage {
 		return "[src] " + getSource() + " [dst] " + getDest() + " [kind] "
 				+ getKind() + " [seq] " + getSequenceNumber() + " [dup] "
 				+ (isDupe() ? "true" : "false") + " [multicast_seq_vector] "
-				+ Arrays.toString(seqVector) + " [data] "
-				+ getData().toString();
+				+ ((seqVector == null) ? "[]" : Arrays.toString(seqVector)) + " [data] "
+				+ ((getData() == null) ? "" : getData().toString());
 	}
 
 	public String getGroupName() {

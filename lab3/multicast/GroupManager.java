@@ -85,8 +85,8 @@ public class GroupManager {
 		// acquire a lock here!
 		try {
 			lockForReliabilityQueue.lock();
-			System.out
-					.println("message added to reliability queue - " + originalMessage);
+			//System.out
+			//		.println("message added to reliability queue - " + originalMessage);
 			reliabilityQueue.put(rqElem);
 			lockForReliabilityQueue.unlock();
 		} catch (InterruptedException e) {
@@ -149,7 +149,7 @@ public class GroupManager {
 				RQueueElement rqElem = new RQueueElement(remainingNodes,
 						System.currentTimeMillis(), originalMessage);
 				try {
-					System.out.println("message added to reliability queue - " + originalMessage);
+					//System.out.println("message added to reliability queue - " + originalMessage);
 					reliabilityQueue.put(rqElem);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -175,8 +175,8 @@ public class GroupManager {
 		if (type == Type.TIMEOUT) {
 			// receive a TIMEOUT message from source, this means source
 			// did not receive the ACK
-			System.out
-					.println("resending a message because the type of the message received is TIMEOUT");
+			//System.out
+			//		.println("resending a message because the type of the message received is TIMEOUT");
 			message = new MulticastMessage(originalMessage.getGroupName(),
 					localName, from, originalMessage.getKind(),
 					new MulticastMessage(originalMessage), Type.ACK, null);
@@ -221,8 +221,8 @@ public class GroupManager {
 			if (rqElem.getRemainingNodes().isEmpty()) {
 				try {
 					casualOrderingQueue.put(rqElem.getMessage());
-					System.out.println("message added to casuality queue - "
-							+ rqElem.getMessage());
+					//System.out.println("message added to casuality queue - "
+					//		+ rqElem.getMessage());
 					itrRQElem.remove();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -240,8 +240,8 @@ public class GroupManager {
 				try {
 					seqVector[sourceMemberId]++;
 					deliverQueue.put(message);
-					System.out.println("message added to deliver queue - "
-							+ message);
+					//System.out.println("message added to deliver queue - "
+					//		+ message);
 					itrMessage.remove();
 				} catch (InterruptedException e) {
 					e.printStackTrace();

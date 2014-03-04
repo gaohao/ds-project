@@ -79,20 +79,13 @@ public class MutualExclusionControlPanel {
 			System.exit(-1);
 		}
 
-//		messagePasser = new MessagePasser(configurationFileName, localName, ci, cp);
-		// create CORMulticast and ClockService instances
 		ClockService.initialize(ci.getContactMap().size(), ci.getType(), ci.getLocalNodeId());
-//		multicastService = new CORMulticast(configurationFileName, localName, ci, cp);
-		
-//		receiver = new Receiver();
-//		receiverThread = new Thread(receiver);
-//		receiverThread.start();
 		
 		me = new MutualExclusion(configurationFileName, localName, ci, cp);
 
 		Scanner scanner = new Scanner(System.in);
 		while (true) {
-			System.out.print("DS_Lab2(" + localName + ")>> ");
+			System.out.print("DS_Lab3(" + localName + ")>> ");
 			String cmd = scanner.nextLine();
 			if (cmd.equals(HELP_CMD)) {
 				System.out.println(HELP_CONTENT);
@@ -113,9 +106,6 @@ public class MutualExclusionControlPanel {
 				me.releaseCS();
 			}
 			
-//			if (!receiverThread.isAlive()) {
-//				System.out.println("MulticastControlPanel health check: receiver thread died");
-//			}
 		}
 	}
 
